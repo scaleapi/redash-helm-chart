@@ -1,0 +1,72 @@
+{{ range $key, $worker := .Values.workers }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redash.worker.fullname" (dict "root" $ "worker" $worker) }}
+  labels:
+    {{- include "redash.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $worker.name }}
+spec:
+  replicas: {{ $worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "redash.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $worker.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "redash.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $worker.name }}
+      {{- if $worker.podAnnotations }}
+      annotations:
+      {{ toYaml $worker.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "redash.serviceAccountName" $ }}
+      securityContext:
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "redash.name" $ }}-{{ $worker.name }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          command: ["/bin/sh"]
+          args: ["-c", ". /config/dynamicenv.sh && /app/bin/docker-entrypoint worker"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          env:
+          {{- include "redash.env" $ | nindent 12 }}
+          {{- range $key, $value := $worker.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+          envFrom:
+          {{- include "redash.envFrom" $ | nindent 12 }}
+          resources:
+{{ toYaml $worker.resources | indent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "redash.fullname" $ }}
+    {{- if $worker.nodeSelector }}
+      nodeSelector:
+{{ toYaml $worker.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- with $worker.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $worker.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+
+---
+
+{{ end }}

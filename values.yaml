@@ -344,39 +344,43 @@ ingress:
   #      - chart-example.local
 
 ## Configuration for Redash ad-hoc workers
-adhocWorker:
-  # adhocWorker.env -- Redash ad-hoc worker specific envrionment variables.
-  env:
-    QUEUES: "queries,celery"
-    WORKERS_COUNT: 2
+workers:
+  # Can have multiple of these
+  adhocWorker:
+    name: adhocworker
 
-  # adhocWorker.replicaCount -- Number of ad-hoc worker pods to run
-  replicaCount: 1
+    # adhocWorker.env -- Redash ad-hoc worker specific envrionment variables.
+    env:
+      QUEUES: "queries,celery"
+      WORKERS_COUNT: 2
 
-  # adhocWorker.resources -- Ad-hoc worker resource requests and limits [ref](http://kubernetes.io/docs/user-guide/compute-resources/)
-  resources:
-    # limits:
-    #   cpu: 500m
-    #   memory: 3Gi
-    # requests:
-    #   cpu: 100m
-    #  memory: 500Mi
+    # adhocWorker.replicaCount -- Number of ad-hoc worker pods to run
+    replicaCount: 1
 
-  # adhocWorker.podSecurityContext -- Security contexts for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-  podSecurityContext: {}
-  securityContext: {}
+    # adhocWorker.resources -- Ad-hoc worker resource requests and limits [ref](http://kubernetes.io/docs/user-guide/compute-resources/)
+    resources:
+      # limits:
+      #   cpu: 500m
+      #   memory: 3Gi
+      # requests:
+      #   cpu: 100m
+      #  memory: 500Mi
 
-  # adhocWorker.nodeSelector -- Node labels for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/user-guide/node-selection/)
-  nodeSelector: {}
+    # adhocWorker.podSecurityContext -- Security contexts for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+    podSecurityContext: {}
+    securityContext: {}
 
-  # adhocWorker.tolerations -- Tolerations for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
-  tolerations: []
+    # adhocWorker.nodeSelector -- Node labels for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/user-guide/node-selection/)
+    nodeSelector: {}
 
-  # adhocWorker.affinity -- Affinity for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity)
-  affinity: {}
+    # adhocWorker.tolerations -- Tolerations for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
+    tolerations: []
 
-  # adhocWorker.podAnnotations -- Annotations for adhoc worker pod assignment [ref](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
-  podAnnotations: {}
+    # adhocWorker.affinity -- Affinity for ad-hoc worker pod assignment [ref](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity)
+    affinity: {}
+
+    # adhocWorker.podAnnotations -- Annotations for adhoc worker pod assignment [ref](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+    podAnnotations: {}
 
 ## Configuration for Redash scheduled workers
 scheduledWorker:

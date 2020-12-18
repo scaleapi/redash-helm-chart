@@ -33,10 +33,10 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
-Create a default fully qualified adhocWorker name.
+Create a default fully qualified worker name.
 */}}
-{{- define "redash.adhocWorker.fullname" -}}
-{{- template "redash.fullname" . -}}-adhocworker
+{{- define "redash.worker.fullname" -}}
+{{- template "redash.fullname" .root -}}-{{- .worker.name -}}
 {{- end -}}
 
 {{/*

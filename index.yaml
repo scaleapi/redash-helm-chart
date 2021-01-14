@@ -3,7 +3,7 @@ entries:
   postgresql:
   - apiVersion: v1
     appVersion: 11.8.0
-    created: "2021-01-13T17:44:22.130042207-08:00"
+    created: "2021-01-13T17:49:55.4429715-08:00"
     description: Chart for PostgreSQL, an object-relational database management system
       (ORDBMS) with an emphasis on extensibility and on standards-compliance.
     digest: 5629bfe9ddd829fe1fc20aa469891911b767ef2110f20727e1294d49e7ef8529
@@ -30,7 +30,7 @@ entries:
   redash:
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-01-13T17:44:22.128357963-08:00"
+    created: "2021-01-13T17:49:55.464536512-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -56,11 +56,11 @@ entries:
     sources:
     - https://github.com/getredash/redash
     urls:
-    - redash-3.0.1.tgz
+    - release/redash-3.0.1.tgz
     version: 3.0.1
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-01-13T17:44:22.118135726-08:00"
+    created: "2021-01-13T17:49:55.453405155-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -86,14 +86,14 @@ entries:
     sources:
     - https://github.com/getredash/redash
     urls:
-    - redash-3.0.0.tgz
+    - release/redash-3.0.0.tgz
     version: 3.0.0
   redis:
   - annotations:
       category: Database
     apiVersion: v1
     appVersion: 6.0.8
-    created: "2021-01-13T17:44:22.132318525-08:00"
+    created: "2021-01-13T17:49:55.446185605-08:00"
     description: Open source, advanced key-value store. It is often referred to as
       a data structure server since keys can contain strings, hashes, lists, sets
       and sorted sets.
@@ -116,4 +116,4 @@ entries:
     urls:
     - charts/redis-10.9.0.tgz
     version: 10.9.0
-generated: "2021-01-13T17:44:22.10994634-08:00"
+generated: "2021-01-13T17:49:55.44082788-08:00"

@@ -27,3 +27,5 @@ scripts/
 *.gotmpl
 .restyled.yaml
 .pre-commit-config.yaml
+
+release/

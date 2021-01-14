@@ -3,7 +3,7 @@ entries:
   postgresql:
   - apiVersion: v1
     appVersion: 11.8.0
-    created: "2021-01-13T17:49:55.4429715-08:00"
+    created: "2021-01-13T17:56:37.394867812-08:00"
     description: Chart for PostgreSQL, an object-relational database management system
       (ORDBMS) with an emphasis on extensibility and on standards-compliance.
     digest: 5629bfe9ddd829fe1fc20aa469891911b767ef2110f20727e1294d49e7ef8529
@@ -30,7 +30,7 @@ entries:
   redash:
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-01-13T17:49:55.464536512-08:00"
+    created: "2021-01-13T17:56:37.418886812-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -42,7 +42,37 @@ entries:
       version: ^8.10.14
     description: Redash is an open source tool built for teams to query, visualize
       and collaborate.
-    digest: 53f2708ade1983a11ae950470ef43b42c53897907016ac4bb46fffb0ad450218
+    digest: 2812fe82822aef3f67c5501d4b60de6fe11fed46aa96f1486bb98819f17f3197
+    home: https://redash.io/
+    icon: https://redash.io/assets/images/elements/redash-logo.svg
+    keywords:
+    - redash
+    - analytics
+    - vizualisation
+    maintainers:
+    - email: owen.barton@civicactions.com
+      name: Owen Barton
+    name: redash
+    sources:
+    - https://github.com/getredash/redash
+    urls:
+    - release/redash-3.0.2.tgz
+    version: 3.0.2
+  - apiVersion: v1
+    appVersion: 8.0.2.b37747
+    created: "2021-01-13T17:56:37.412965139-08:00"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: ^10.8.2
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: ^8.10.14
+    description: Redash is an open source tool built for teams to query, visualize
+      and collaborate.
+    digest: fe73c6f04bcf5aead531465b600ff6b36a96a96e157fdf5a26e479df697ce1a7
     home: https://redash.io/
     icon: https://redash.io/assets/images/elements/redash-logo.svg
     keywords:
@@ -60,7 +90,7 @@ entries:
     version: 3.0.1
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-01-13T17:49:55.453405155-08:00"
+    created: "2021-01-13T17:56:37.406094504-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -93,7 +123,7 @@ entries:
       category: Database
     apiVersion: v1
     appVersion: 6.0.8
-    created: "2021-01-13T17:49:55.446185605-08:00"
+    created: "2021-01-13T17:56:37.397783003-08:00"
     description: Open source, advanced key-value store. It is often referred to as
       a data structure server since keys can contain strings, hashes, lists, sets
       and sorted sets.
@@ -116,4 +146,4 @@ entries:
     urls:
     - charts/redis-10.9.0.tgz
     version: 10.9.0
-generated: "2021-01-13T17:49:55.44082788-08:00"
+generated: "2021-01-13T17:56:37.392819591-08:00"

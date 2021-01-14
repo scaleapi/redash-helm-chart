@@ -3,7 +3,7 @@ entries:
   postgresql:
   - apiVersion: v1
     appVersion: 11.8.0
-    created: "2020-12-18T10:17:44.99178177-08:00"
+    created: "2021-01-13T17:44:22.130042207-08:00"
     description: Chart for PostgreSQL, an object-relational database management system
       (ORDBMS) with an emphasis on extensibility and on standards-compliance.
     digest: 5629bfe9ddd829fe1fc20aa469891911b767ef2110f20727e1294d49e7ef8529
@@ -30,7 +30,37 @@ entries:
   redash:
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2020-12-18T10:17:44.988919594-08:00"
+    created: "2021-01-13T17:44:22.128357963-08:00"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: ^10.8.2
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: ^8.10.14
+    description: Redash is an open source tool built for teams to query, visualize
+      and collaborate.
+    digest: 53f2708ade1983a11ae950470ef43b42c53897907016ac4bb46fffb0ad450218
+    home: https://redash.io/
+    icon: https://redash.io/assets/images/elements/redash-logo.svg
+    keywords:
+    - redash
+    - analytics
+    - vizualisation
+    maintainers:
+    - email: owen.barton@civicactions.com
+      name: Owen Barton
+    name: redash
+    sources:
+    - https://github.com/getredash/redash
+    urls:
+    - redash-3.0.1.tgz
+    version: 3.0.1
+  - apiVersion: v1
+    appVersion: 8.0.2.b37747
+    created: "2021-01-13T17:44:22.118135726-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -63,7 +93,7 @@ entries:
       category: Database
     apiVersion: v1
     appVersion: 6.0.8
-    created: "2020-12-18T10:17:44.996084559-08:00"
+    created: "2021-01-13T17:44:22.132318525-08:00"
     description: Open source, advanced key-value store. It is often referred to as
       a data structure server since keys can contain strings, hashes, lists, sets
       and sorted sets.
@@ -86,4 +116,4 @@ entries:
     urls:
     - charts/redis-10.9.0.tgz
     version: 10.9.0
-generated: "2020-12-18T10:17:44.97495258-08:00"
+generated: "2021-01-13T17:44:22.10994634-08:00"

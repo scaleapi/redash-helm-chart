@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/component: {{ $worker.name }}
       {{- if $worker.podAnnotations }}
       annotations:
-      {{ toYaml $worker.podAnnotations | nindent 8 }}
+      {{- toYaml $worker.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
     {{- with $.Values.imagePullSecrets }}

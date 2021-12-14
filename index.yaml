@@ -3,7 +3,7 @@ entries:
   postgresql:
   - apiVersion: v1
     appVersion: 11.8.0
-    created: "2021-12-14T12:03:43.505061015-08:00"
+    created: "2021-12-14T12:58:29.818925321-08:00"
     description: Chart for PostgreSQL, an object-relational database management system
       (ORDBMS) with an emphasis on extensibility and on standards-compliance.
     digest: 5629bfe9ddd829fe1fc20aa469891911b767ef2110f20727e1294d49e7ef8529
@@ -30,7 +30,7 @@ entries:
   redash:
   - apiVersion: v1
     appVersion: 10.0.0.b50363
-    created: "2021-12-14T12:03:43.542427594-08:00"
+    created: "2021-12-14T12:58:29.853279655-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -42,7 +42,7 @@ entries:
       version: ^8.10.14
     description: Redash is an open source tool built for teams to query, visualize
       and collaborate.
-    digest: 1bf4b68ed1888bacb8d03a1376227a5f90601b480aa58fa4bff258cbd8bfee3b
+    digest: 0180220abadf6c05dc120fefc5e9e821838291c8f621a381eca85092a42fb2a0
     home: https://redash.io/
     icon: https://redash.io/assets/images/elements/redash-logo.svg
     keywords:
@@ -60,7 +60,7 @@ entries:
     version: 3.0.3
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-12-14T12:03:43.53267838-08:00"
+    created: "2021-12-14T12:58:29.84627411-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -90,7 +90,7 @@ entries:
     version: 3.0.2
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-12-14T12:03:43.524696982-08:00"
+    created: "2021-12-14T12:58:29.839086124-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -120,7 +120,7 @@ entries:
     version: 3.0.1
   - apiVersion: v1
     appVersion: 8.0.2.b37747
-    created: "2021-12-14T12:03:43.516158104-08:00"
+    created: "2021-12-14T12:58:29.8310278-08:00"
     dependencies:
     - condition: redis.enabled
       name: redis
@@ -153,7 +153,7 @@ entries:
       category: Database
     apiVersion: v1
     appVersion: 6.0.8
-    created: "2021-12-14T12:03:43.507948554-08:00"
+    created: "2021-12-14T12:58:29.822749669-08:00"
     description: Open source, advanced key-value store. It is often referred to as
       a data structure server since keys can contain strings, hashes, lists, sets
       and sorted sets.
@@ -176,4 +176,4 @@ entries:
     urls:
     - charts/redis-10.9.0.tgz
     version: 10.9.0
-generated: "2021-12-14T12:03:43.501974236-08:00"
+generated: "2021-12-14T12:58:29.816069167-08:00"

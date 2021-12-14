@@ -7,6 +7,11 @@ metadata:
     app.kubernetes.io/component: server
 spec:
   replicas: {{ .Values.server.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
   selector:
     matchLabels:
       {{- include "redash.selectorLabels" . | nindent 6 }}

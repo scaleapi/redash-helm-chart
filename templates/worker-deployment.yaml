@@ -17,6 +17,9 @@ spec:
       labels:
         {{- include "redash.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $worker.name }}
+        {{- if $worker.podLabels }}
+        {{- tpl (toYaml $worker.podLabels) $ | nindent 8 }}
+        {{- end }}
       {{- if $worker.podAnnotations }}
       annotations:
       {{- toYaml $worker.podAnnotations | nindent 8 }}
@@ -40,6 +43,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            {{- with $worker.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
           {{- include "redash.env" $ | nindent 12 }}
           {{- range $key, $value := $worker.env }}
@@ -54,6 +60,9 @@ spec:
         - name: config
           configMap:
             name: {{ include "redash.fullname" $ }}
+        {{- with $worker.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     {{- if $worker.nodeSelector }}
       nodeSelector:
 {{ toYaml $worker.nodeSelector | indent 8 }}

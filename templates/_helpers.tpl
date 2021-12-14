@@ -40,20 +40,6 @@ Create a default fully qualified worker name.
 {{- end -}}
 
 {{/*
-Create a default fully qualified scheduledworker name.
-*/}}
-{{- define "redash.scheduledWorker.fullname" -}}
-{{- template "redash.fullname" . -}}-scheduledworker
-{{- end -}}
-
-{{/*
-Create a default fully qualified genericWorker name.
-*/}}
-{{- define "redash.genericWorker.fullname" -}}
-{{- template "redash.fullname" . -}}-genericworker
-{{- end -}}
-
-{{/*
 Create a default fully qualified scheduler name.
 */}}
 {{- define "redash.scheduler.fullname" -}}

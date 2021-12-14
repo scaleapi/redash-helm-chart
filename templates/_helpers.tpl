@@ -47,6 +47,20 @@ Create a default fully qualified scheduledworker name.
 {{- end -}}
 
 {{/*
+Create a default fully qualified genericWorker name.
+*/}}
+{{- define "redash.genericWorker.fullname" -}}
+{{- template "redash.fullname" . -}}-genericworker
+{{- end -}}
+
+{{/*
+Create a default fully qualified scheduler name.
+*/}}
+{{- define "redash.scheduler.fullname" -}}
+{{- template "redash.fullname" . -}}-scheduler
+{{- end -}}
+
+{{/*
 Create a default fully qualified postgresql name.
 */}}
 {{- define "redash.postgresql.fullname" -}}
@@ -481,6 +495,10 @@ Shared environment block used across each component.
 - name: REDASH_FEATURE_AUTO_PUBLISH_NAMED_QUERIES
   value: {{ default  .Values.redash.featureAutoPublishNamedQueries | quote }}
 {{- end }}
+{{- if .Values.redash.featureExtendedAlertOptions }}
+- name: REDASH_FEATURE_EXTENDED_ALERT_OPTIONS
+  value: {{ default  .Values.redash.featureExtendedAlertOptions | quote }}
+{{- end }}
 {{- if .Values.redash.bigqueryHttpTimeout }}
 - name: REDASH_BIGQUERY_HTTP_TIMEOUT
   value: {{ default  .Values.redash.bigqueryHttpTimeout | quote }}
@@ -492,6 +510,10 @@ Shared environment block used across each component.
 {{- if .Values.redash.webWorkers }}
 - name: REDASH_WEB_WORKERS
   value: {{ default  .Values.redash.webWorkers | quote }}
+{{- end }}
+{{- if .Values.redash.sqlAlchemyEnablePoolPrePing }}
+- name: SQLALCHEMY_ENABLE_POOL_PRE_PING
+  value: {{ default .Values.redash.sqlAlchemyEnablePoolPrePing | quote }}
 {{- end }}
 ## End primary Redash configuration
 {{- end -}}

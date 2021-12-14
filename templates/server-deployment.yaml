@@ -16,6 +16,9 @@ spec:
       labels:
         {{- include "redash.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: server
+        {{- if .Values.server.podLabels }}
+        {{- tpl (toYaml .Values.server.podLabels) $ | nindent 8 }}
+        {{- end }}
       {{- if .Values.server.podAnnotations }}
       annotations:
       {{ toYaml .Values.server.podAnnotations | nindent 8 }}
@@ -27,9 +30,11 @@ spec:
     {{- end }}
       serviceAccountName: {{ include "redash.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.server.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ include "redash.name" . }}-server
+          securityContext:
+            {{- toYaml .Values.server.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh"]
@@ -37,6 +42,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            {{- with .Values.server.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
           {{- include "redash.env" . | nindent 12 }}
           {{- range $key, $value := .Values.server.env }}
@@ -72,6 +80,9 @@ spec:
         - name: config
           configMap:
             name: {{ include "redash.fullname" . }}
+        {{- with .Values.server.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     {{- with .Values.server.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

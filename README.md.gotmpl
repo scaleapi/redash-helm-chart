@@ -15,8 +15,8 @@ Current chart version is `{{ template "chart.version" . }}`
 ## Prerequisites
 
 - At least 3 GB of RAM available on your cluster
-- Kubernetes 1.16+ - chart is tested with latest 3 stable versions
-- Helm 2 or 3
+- Kubernetes 1.19+ - chart is tested with latest 3 stable versions
+- Helm 3 (Helm 2 depreciated)
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
@@ -36,6 +36,8 @@ redash:
   secretKey: $(openssl rand -base64 32)
 postgresql:
   postgresqlPassword: $(openssl rand -base64 32)
+redis:
+  password: $(openssl rand -base64 32)
 EOM
 ```
 
@@ -82,6 +84,15 @@ helm upgrade --reuse-values my-release redash/redash
 ```
 
 Below are notes on manual configuration changes or steps needed for major chart version updates.
+
+### From 2.x to 3.x
+
+- The Redash version is updated from v8 to v10 (v9 never had a stable release)
+- The upgrade should be automatic, but please test on a staging environment first!
+- There are now additional "genericworker" and "scheduler" deployments, with associated configuration in values.yaml
+- 3.x and higher will not run with Redash v8 - if you have overriden the image you will need to update that 
+- This chart now requires Kubernetes 1.19+
+- Helm 2 is now depreciated and support will be removed in a future version
 
 ### From 1.x to 2.x
 

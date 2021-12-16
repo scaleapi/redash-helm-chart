@@ -7,6 +7,9 @@ metadata:
 data:
   install-upgrade.sh: |
     #!/usr/bin/env bash
+    # Need to kill istio sidecar after this finishes
+    trap "curl --max-time 2 -s -f -XPOST http://localhost:15000/quitquitquit" EXIT
+
     echo "This will retry connections until PostgreSQL/Redis is up, then perform database installation/migrations as needed."
 
     # Status command timeout

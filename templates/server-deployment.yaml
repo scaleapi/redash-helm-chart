@@ -56,6 +56,10 @@ spec:
             - name: "{{ $key }}"
               value: "{{ $value }}"
           {{- end }}
+            - name: DD_AGENT_HOST
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
           envFrom:
           {{- include "redash.envFrom" . | nindent 12 }}
           ports:

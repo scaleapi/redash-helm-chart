@@ -35,6 +35,10 @@ redash:
   ## This allows multiple versions of Redash (which may have different defaults) to be more easily used
   # -- REQUIRED `REDASH_SECRET_KEY` value. Secret key used for data encryption. Stored as a Secret value.
   secretKey: ""
+  # -- REQUIRED `REDASH_LITELLM_API_KEY` value. Secret key used for AI integration. Stored as a Secret value.
+  liteLLMAPIKey: ""
+  # -- REQUIRED `REDASH_MODEL_BASE_URL` value. Custom host for AI integration. Stored as a Secret value.
+  modelBaseUrl: ""
   # -- `REDASH_SAML_SCHEME_OVERRIDE` value. This setting will allow you to override the saml auth url scheme that gets constructed by flask. this is a useful feature if, for example, you're behind a proxy protocol enabled tcp load balancer (aws elb that terminates ssl) and your nginx proxy or similar adds a x-forwarded-proto of http even though your redash url for saml auth is https..
   samlSchemeOverride: ""
   # -- `REDASH_PROXIES_COUNT` value.

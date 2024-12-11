@@ -111,6 +111,8 @@ jobs:
             redash:
               cookieSecret: $(openssl rand -base64 32)
               secretKey: $(openssl rand -base64 32)
+              modelBaseUrl: xxx
+              liteLLMAPIKey: xxx
               env:
                 REDASH_WEB_WORKERS: 1
             postgresql:

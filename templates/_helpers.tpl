@@ -282,6 +282,20 @@ Shared environment block used across each component.
       name: {{ include "redash.secretName" . }}
       key: cookieSecret
 {{- end }}
+{{- if or .Values.redash.liteLLMAPIKey .Values.redash.existingSecret }}
+- name: REDASH_LITELLM_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: liteLLMAPIKey
+{{- end }}
+{{- if or .Values.redash.modelBaseUrl .Values.redash.existingSecret }}
+- name: REDASH_MODEL_BASE_URL
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: modelBaseUrl
+{{- end }}
 {{- if .Values.redash.logLevel }}
 - name: REDASH_LOG_LEVEL
   value: {{ default  .Values.redash.logLevel | quote }}

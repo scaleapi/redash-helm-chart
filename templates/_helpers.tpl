@@ -296,24 +296,28 @@ Shared environment block used across each component.
       name: {{ include "redash.secretName" . }}
       key: modelBaseUrl
 {{- end }}
+{{- if or .Values.redash.egpAPIKey .Values.redash.existingSecret }}
 - name: REDASH_EGP_API_KEY
   valueFrom:
     secretKeyRef:
       name: {{ include "redash.secretName" . }}
       key: egpAPIKey
 {{- end }}
+{{- if or .Values.redash.egpAccountId .Values.redash.existingSecret }}
 - name: REDASH_EGP_ACCOUNT_ID
   valueFrom:
     secretKeyRef:
       name: {{ include "redash.secretName" . }}
       key: egpAccountId
 {{- end }}
+{{- if or .Values.redash.egpKBQueries .Values.redash.existingSecret }}
 - name: REDASH_EGP_KB_QUERIES
   valueFrom:
     secretKeyRef:
       name: {{ include "redash.secretName" . }}
       key: egpKBQueries
 {{- end }}
+{{- if or .Values.redash.egpKBTables .Values.redash.existingSecret }}
 - name: REDASH_EGP_KB_TABLES
   valueFrom:
     secretKeyRef:

@@ -296,6 +296,30 @@ Shared environment block used across each component.
       name: {{ include "redash.secretName" . }}
       key: modelBaseUrl
 {{- end }}
+- name: REDASH_EGP_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: egpAPIKey
+{{- end }}
+- name: REDASH_EGP_ACCOUNT_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: egpAccountId
+{{- end }}
+- name: REDASH_EGP_KB_QUERIES
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: egpKBQueries
+{{- end }}
+- name: REDASH_EGP_KB_TABLES
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: egpKBTables
+{{- end }}
 {{- if .Values.redash.logLevel }}
 - name: REDASH_LOG_LEVEL
   value: {{ default  .Values.redash.logLevel | quote }}

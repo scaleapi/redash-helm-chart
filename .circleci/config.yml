@@ -113,6 +113,10 @@ jobs:
               secretKey: $(openssl rand -base64 32)
               modelBaseUrl: xxx
               liteLLMAPIKey: xxx
+              egpAPIKey: xxx
+              egpAccountId: xxx
+              egpKBQueries: xxx
+              egpKBTables: xxx
               env:
                 REDASH_WEB_WORKERS: 1
             postgresql:

@@ -58,7 +58,7 @@ entries:
     urls:
     - release/redash-3.0.11.tgz
     version: 3.0.11
-    - apiVersion: v1
+  - apiVersion: v1
     appVersion: 11.0.0-next
     created: "2025-07-01T18:44:53.158Z"
     dependencies:

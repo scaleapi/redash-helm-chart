@@ -405,6 +405,8 @@ Shared environment block used across each component.
 {{- end }}
 {{- if .Values.redash.additionalQueryRunners }}
 - name: REDASH_ADDITIONAL_QUERY_RUNNERS
+  value: {{ default  .Values.redash.additionalQueryRunners | quote }}
+{{- end }}
 {{- if .Values.redash.sfOCSPFailOpen }}
 - name: SF_OCSP_FAIL_OPEN
   value: {{ default  .Values.redash.sfOCSPFailOpen | quote }}

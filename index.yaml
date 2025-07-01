@@ -42,7 +42,7 @@ entries:
       version: ^8.10.14
     description: Redash is an open source tool built for teams to query, visualize
       and collaborate.
-    digest: 283dccf06279aa991ea94072c80e884fc234bac4ee73959bd7ffe950c5254809
+    digest: 9b30da0467e2332e60f6cfd4cce22324807c91e9fa6d2adc887add97ea5912cd
     home: https://redash.io/
     icon: https://redash.io/assets/images/elements/redash-logo.svg
     keywords:

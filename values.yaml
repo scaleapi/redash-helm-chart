@@ -47,6 +47,10 @@ redash:
   egpKBQueries: ""
   # -- REQUIRED `REDASH_EGP_KB_TABLES` value. Vector search tables.
   egpKBTables: ""
+  # -- `DUA_AGENTEX_API_KEY` value. DUA agentex API key. Stored as a Secret value.
+  duaAgentexAPIKey: ""
+  # -- `DUA_AGENTEX_ACCOUNT_ID` value. DUA agentex account id. Stored as a Secret value.
+  duaAgentexAccountId: ""
   # -- `REDASH_SAML_SCHEME_OVERRIDE` value. This setting will allow you to override the saml auth url scheme that gets constructed by flask. this is a useful feature if, for example, you're behind a proxy protocol enabled tcp load balancer (aws elb that terminates ssl) and your nginx proxy or similar adds a x-forwarded-proto of http even though your redash url for saml auth is https..
   samlSchemeOverride: ""
   # -- `REDASH_PROXIES_COUNT` value.

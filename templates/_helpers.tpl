@@ -324,6 +324,20 @@ Shared environment block used across each component.
       name: {{ include "redash.secretName" . }}
       key: egpKBTables
 {{- end }}
+{{- if or .Values.redash.duaAgentexAPIKey .Values.redash.existingSecret }}
+- name: DUA_AGENTEX_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: duaAgentexAPIKey
+{{- end }}
+{{- if or .Values.redash.duaAgentexAccountId .Values.redash.existingSecret }}
+- name: DUA_AGENTEX_ACCOUNT_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "redash.secretName" . }}
+      key: duaAgentexAccountId
+{{- end }}
 {{- if .Values.redash.existingSecret }}
 - name: REDASH_SNOWFLAKE_SERVICE_USER
   valueFrom:

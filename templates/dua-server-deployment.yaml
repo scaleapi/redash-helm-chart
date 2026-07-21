@@ -1,4 +1,12 @@
 {{- if .Values.duaServer.enabled }}
+# ============================================================================================
+# KEEP THE POD SPEC IN SYNC WITH server-deployment.yaml.
+# This is a deliberate near-clone of the main server (see dua_scaling_slice1.md "Code-review
+# findings #3" for why we keep two explicit files rather than a shared template). Any change to
+# the server pod spec — env, volumes/volumeMounts, probes, ports, resources, securityContext,
+# command — must be mirrored here, or inherited from .Values.server.* (as env/volumes/security
+# already are). The only intended differences are the gunicorn worker vars + grace period.
+# ============================================================================================
 # Isolated DUA server: serves /api/dua/* on its own pool so long streaming turns never occupy the
 # main web pool. Same image + entrypoint as the main server; the only difference is the gunicorn
 # worker class/threads (gthread) so a blocked SSE stream occupies a thread, not the whole process.

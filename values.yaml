@@ -402,21 +402,36 @@ duaServer:
   resources:
     requests: { cpu: 250m, memory: 1Gi }
     limits:   { cpu: "1",  memory: 3Gi }
-  # duaServer.terminationGracePeriodSeconds -- grace for in-flight SSE turns to drain on shutdown
-  terminationGracePeriodSeconds: 90
-  # duaServer.pdb -- PodDisruptionBudget (matches the redash-server PDB; keeps >=1 pod during drains)
+  # duaServer.terminationGracePeriodSeconds -- total pod-shutdown budget. Must cover
+  # preStopDrainSeconds + gunicorn --graceful-timeout (15 + 300 = 315), else k8s SIGKILLs mid-drain.
+  terminationGracePeriodSeconds: 320
+  # duaServer.preStopDrainSeconds -- sleep before SIGTERM so Istio de-registers the pod from the
+  # EndpointSlice before gunicorn stops accepting (keeps new turns off a terminating pod).
+  preStopDrainSeconds: 15
+  # duaServer.pdb -- PodDisruptionBudget for the DUA pool (the only PDB in this chart).
+  # maxUnavailable (not minAvailable): drain-safe at any replicaCount -- minAvailable:1 would
+  # deadlock node drains when replicaCount is 1 (disruptionsAllowed = healthy - minAvailable = 0).
   pdb:
     enabled: true
-    minAvailable: 1
+    maxUnavailable: 1
   # duaServer.env -- extra env. GUNICORN_CMD_ARGS raises gunicorn's graceful-timeout so a recycling
   # worker drains its in-flight SSE turn instead of cutting it at the 30s default.
   env:
     GUNICORN_CMD_ARGS: "--graceful-timeout 300"
+  # duaServer.service.annotations -- annotations for the DUA Service, independent of service.annotations
+  # (the main external service): this is an internal ClusterIP reached only via the istio VirtualService.
+  service:
+    annotations: {}
   podSecurityContext: {}
   securityContext: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  # duaServer.topologySpread -- spread pods across nodes (soft) so one node loss can't take out the
+  # whole isolated pool. ScheduleAnyway keeps it non-blocking; selects only dua-server pods.
+  topologySpread:
+    enabled: true
+    whenUnsatisfiable: ScheduleAnyway
   podAnnotations: {}
   podLabels: {}
   volumes: []

@@ -7,8 +7,9 @@ metadata:
   labels:
     {{- include "redash.labels" . | nindent 4 }}
     app.kubernetes.io/component: dua-server
+  # Own annotations (not the main service's): this is an internal ClusterIP reached only via istio.
   annotations:
-  {{- with .Values.service.annotations }}
+  {{- with .Values.duaServer.service.annotations }}
   {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:

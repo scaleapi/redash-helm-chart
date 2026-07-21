@@ -38,8 +38,9 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       serviceAccountName: {{ include "redash.serviceAccountName" . }}
-      # Grace for in-flight SSE turns to drain on shutdown.
-      terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds | default 90 }}
+      # Grace for in-flight SSE turns to drain on shutdown. Owned by values.yaml (must cover
+      # preStopDrainSeconds + gunicorn --graceful-timeout).
+      terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds }}
       securityContext:
         {{- toYaml (.Values.duaServer.podSecurityContext | default .Values.server.podSecurityContext) | nindent 8 }}
       containers:
@@ -73,6 +74,7 @@ spec:
               value: "{{ .Values.duaServer.workerClass }}"
             - name: GUNICORN_THREADS
               value: "{{ .Values.duaServer.threads }}"
+          # duaServer.env last: on a key collision it intentionally overrides server.env (k8s last-wins).
           {{- range $key, $value := .Values.duaServer.env }}
             - name: "{{ $key }}"
               value: "{{ $value }}"
@@ -103,6 +105,14 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
+          # preStop drain: sleep so Istio removes this pod from the EndpointSlice before gunicorn
+          # stops accepting, so NEW /api/dua turns don't land on a terminating pod (retries are
+          # disabled for /api/dua/*, so a refused new turn fails outright). NOTE: this holds the app
+          # open, not the istio sidecar — pair with the mesh-side drain (deploy repo) to fully close it.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep {{ .Values.duaServer.preStopDrainSeconds }}"]
           resources:
 {{ toYaml .Values.duaServer.resources | indent 12 }}
       volumes:
@@ -126,5 +136,16 @@ spec:
     {{- with (.Values.duaServer.tolerations | default .Values.server.tolerations) }}
       tolerations:
 {{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- if .Values.duaServer.topologySpread.enabled }}
+      # Spread pods across nodes so a single node loss can't take out the whole isolated pool.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: {{ .Values.duaServer.topologySpread.whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              {{- include "redash.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: dua-server
     {{- end }}
 {{- end }}

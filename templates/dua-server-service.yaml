@@ -1,6 +1,5 @@
 {{- if .Values.duaServer.enabled }}
-# Service for the isolated DUA server. The istio VirtualService routes uri prefix /api/dua/ to this
-# Service (host: {{ include "redash.fullname" . }}-dua-server), keeping the default route to the main server.
+# Service for the isolated DUA server; the istio VirtualService routes /api/dua/ here.
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,8 +12,7 @@ metadata:
   {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  # Pinned to ClusterIP (not .Values.service.type): this Service is only ever reached via the istio
-  # gateway/VirtualService, so it must never inherit an external LoadBalancer/NodePort type.
+  # ClusterIP (not .Values.service.type): only reached via the istio gateway, never externally.
   type: ClusterIP
   ports:
     - port: {{ .Values.service.port }}

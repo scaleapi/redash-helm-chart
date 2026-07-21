@@ -43,11 +43,11 @@ spec:
       # being SIGKILLed at the default 30s (turns aren't resumable — agentex has no replay).
       terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds | default 90 }}
       securityContext:
-        {{- toYaml .Values.duaServer.podSecurityContext | nindent 8 }}
+        {{- toYaml (.Values.duaServer.podSecurityContext | default .Values.server.podSecurityContext) | nindent 8 }}
       containers:
         - name: {{ include "redash.name" . }}-dua-server
           securityContext:
-            {{- toYaml .Values.duaServer.securityContext | nindent 12 }}
+            {{- toYaml (.Values.duaServer.securityContext | default .Values.server.securityContext) | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh"]
@@ -55,6 +55,10 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            # Inherit the main server's mounts (e.g. the Snowflake key) + any dua-specific extras.
+            {{- with .Values.server.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
             {{- with .Values.duaServer.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -108,18 +112,21 @@ spec:
         - name: config
           configMap:
             name: {{ include "redash.fullname" . }}
+        {{- with .Values.server.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- with .Values.duaServer.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-    {{- with .Values.duaServer.nodeSelector }}
+    {{- with (.Values.duaServer.nodeSelector | default .Values.server.nodeSelector) }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.duaServer.affinity }}
+    {{- with (.Values.duaServer.affinity | default .Values.server.affinity) }}
       affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.duaServer.tolerations }}
+    {{- with (.Values.duaServer.tolerations | default .Values.server.tolerations) }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}

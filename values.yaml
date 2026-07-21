@@ -402,14 +402,20 @@ duaServer:
   resources:
     requests: { cpu: 250m, memory: 1Gi }
     limits:   { cpu: "1",  memory: 3Gi }
-  # duaServer.terminationGracePeriodSeconds -- let in-flight SSE turns drain on rollout/drain
+  # duaServer.terminationGracePeriodSeconds -- pod shutdown grace. NOTE: on a ROLLOUT an in-flight SSE
+  # turn is still cut at the istio sidecar drain (~5s, not configured to hold) regardless of this value
+  # -- see dua_scaling_slice1.md finding A. The frequent worker-recycle path is covered by env.GUNICORN_CMD_ARGS.
   terminationGracePeriodSeconds: 90
   # duaServer.pdb -- PodDisruptionBudget (matches the redash-server PDB; keeps >=1 pod during drains)
   pdb:
     enabled: true
     minAvailable: 1
-  # duaServer.env -- extra env vars merged with the shared env
-  env: {}
+  # duaServer.env -- extra env vars merged with the shared env.
+  # GUNICORN_CMD_ARGS raises gunicorn's graceful-timeout (default 30s) so a worker recycling on
+  # --max-requests drains an in-flight SSE turn (bounded by the ~270s app abort) instead of cutting
+  # it at 30s. Covers the frequent worker-recycle path; the rollout path also needs istio (finding A).
+  env:
+    GUNICORN_CMD_ARGS: "--graceful-timeout 300"
   podSecurityContext: {}
   securityContext: {}
   nodeSelector: {}

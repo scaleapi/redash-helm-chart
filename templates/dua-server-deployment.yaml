@@ -47,8 +47,10 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       serviceAccountName: {{ include "redash.serviceAccountName" . }}
-      # Streaming service: allow in-flight SSE turns to drain on rollout / node drain instead of
-      # being SIGKILLed at the default 30s (turns aren't resumable — agentex has no replay).
+      # Pod shutdown grace (turns aren't resumable — agentex has no replay). NOTE: on a ROLLOUT the
+      # istio sidecar drains (~5s, not configured to hold) and cuts an in-flight SSE turn regardless
+      # of this value — see slice1 doc finding A. The frequent worker-recycle path is covered by
+      # gunicorn --graceful-timeout (set via GUNICORN_CMD_ARGS in duaServer.env).
       terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds | default 90 }}
       securityContext:
         {{- toYaml (.Values.duaServer.podSecurityContext | default .Values.server.podSecurityContext) | nindent 8 }}

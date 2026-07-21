@@ -1,0 +1,126 @@
+{{- if .Values.duaServer.enabled }}
+# Isolated DUA server: serves /api/dua/* on its own pool so long streaming turns never occupy the
+# main web pool. Same image + entrypoint as the main server; the only difference is the gunicorn
+# worker class/threads (gthread) so a blocked SSE stream occupies a thread, not the whole process.
+# Routing of /api/dua/* to this deployment's Service is done in the istio VirtualService (deploy repo).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redash.fullname" . }}-dua-server
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+spec:
+  replicas: {{ .Values.duaServer.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "redash.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: dua-server
+  template:
+    metadata:
+      labels:
+        {{- include "redash.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: dua-server
+        {{- if .Values.duaServer.podLabels }}
+        {{- tpl (toYaml .Values.duaServer.podLabels) $ | nindent 8 }}
+        {{- end }}
+      {{- if .Values.duaServer.podAnnotations }}
+      annotations:
+      {{ toYaml .Values.duaServer.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "redash.serviceAccountName" . }}
+      # Streaming service: allow in-flight SSE turns to drain on rollout / node drain instead of
+      # being SIGKILLed at the default 30s (turns aren't resumable — agentex has no replay).
+      terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds | default 90 }}
+      securityContext:
+        {{- toYaml .Values.duaServer.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "redash.name" . }}-dua-server
+          securityContext:
+            {{- toYaml .Values.duaServer.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh"]
+          args: ["-c", ". /config/dynamicenv.sh && /app/bin/docker-entrypoint server"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            {{- with .Values.duaServer.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+          {{- include "redash.env" . | nindent 12 }}
+          # Inherit the main server's app config (agentex URL/model/KB, Unleash URL, CSP, ...) so the
+          # DUA pool is the same app as the main server — differing ONLY in the gunicorn worker vars below.
+          {{- range $key, $value := .Values.server.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+            - name: REDASH_WEB_WORKERS
+              value: "{{ .Values.duaServer.webWorkers }}"
+            - name: GUNICORN_WORKER_CLASS
+              value: "{{ .Values.duaServer.workerClass }}"
+            - name: GUNICORN_THREADS
+              value: "{{ .Values.duaServer.threads }}"
+          {{- range $key, $value := .Values.duaServer.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          envFrom:
+          {{- include "redash.envFrom" . | nindent 12 }}
+          ports:
+            - containerPort: {{ .Values.server.httpPort }}
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.server.httpPort }}
+            initialDelaySeconds: 90
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.server.httpPort }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+{{ toYaml .Values.duaServer.resources | indent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "redash.fullname" . }}
+        {{- with .Values.duaServer.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    {{- with .Values.duaServer.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.duaServer.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.duaServer.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+{{- end }}

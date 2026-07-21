@@ -1,0 +1,17 @@
+{{- if and .Values.duaServer.enabled .Values.duaServer.pdb.enabled }}
+# Keeps at least minAvailable DUA server pods during voluntary disruptions (node drains, upgrades),
+# matching the existing redash-server PDB pattern.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "redash.fullname" . }}-dua-server
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+spec:
+  minAvailable: {{ .Values.duaServer.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "redash.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: dua-server
+{{- end }}

@@ -1,0 +1,25 @@
+{{- if .Values.duaServer.enabled }}
+# Service for the isolated DUA server. The istio VirtualService routes uri prefix /api/dua/ to this
+# Service (host: {{ include "redash.fullname" . }}-dua-server), keeping the default route to the main server.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "redash.fullname" . }}-dua-server
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+  annotations:
+  {{- with .Values.service.annotations }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.server.httpPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "redash.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+{{- end }}

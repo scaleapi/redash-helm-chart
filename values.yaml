@@ -383,6 +383,43 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+## Configuration for the isolated DUA (Data Understanding Agent) server.
+## Serves /api/dua/* on its own pool (routed via the istio VirtualService) so long streaming turns
+## never occupy the main web pool. Disabled by default; enabling it is additive and reversible.
+duaServer:
+  # duaServer.enabled -- create the dedicated DUA server Deployment + Service
+  enabled: false
+  # duaServer.replicaCount -- number of DUA server pods
+  replicaCount: 2
+  # duaServer.workerClass -- gunicorn worker class; gthread lets a blocked SSE stream occupy a
+  # thread (not the whole process) with no gevent monkeypatch / psycopg2 risk
+  workerClass: gthread
+  # duaServer.threads -- threads per worker (≈ concurrent streams per worker)
+  threads: 16
+  # duaServer.webWorkers -- gunicorn worker processes per pod
+  webWorkers: 2
+  # duaServer.resources -- requests/limits (set explicitly: DUA is I/O-bound / low-CPU; don't run unbounded)
+  resources:
+    requests: { cpu: 250m, memory: 1Gi }
+    limits:   { cpu: "1",  memory: 3Gi }
+  # duaServer.terminationGracePeriodSeconds -- let in-flight SSE turns drain on rollout/drain
+  terminationGracePeriodSeconds: 90
+  # duaServer.pdb -- PodDisruptionBudget (matches the redash-server PDB; keeps >=1 pod during drains)
+  pdb:
+    enabled: true
+    minAvailable: 1
+  # duaServer.env -- extra env vars merged with the shared env
+  env: {}
+  podSecurityContext: {}
+  securityContext: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+  volumes: []
+  volumeMounts: []
+
 ## Configuration for Redash ad-hoc workers
 workers:
   # Can have multiple of these

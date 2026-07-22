@@ -91,6 +91,8 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 10
+          # HTTP readiness intentionally sheds new traffic when all gthread slots are occupied;
+          # TCP liveness above keeps a healthy saturated pod from being restarted.
           readinessProbe:
             httpGet:
               path: /ping

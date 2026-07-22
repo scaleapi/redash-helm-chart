@@ -1,0 +1,24 @@
+{{- if .Values.duaServer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "redash.fullname" . }}-dua-server
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+  annotations:
+  {{- with .Values.duaServer.service.annotations }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Internal ClusterIP; ingress is provided by the Istio VirtualService.
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.server.httpPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "redash.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+{{- end }}

@@ -1,0 +1,141 @@
+{{- if .Values.duaServer.enabled }}
+# Dedicated DUA server for long-lived /api/dua/* requests.
+# Keep shared application settings aligned with server-deployment.yaml.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redash.fullname" . }}-dua-server
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+spec:
+  replicas: {{ .Values.duaServer.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "redash.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: dua-server
+  template:
+    metadata:
+      labels:
+        {{- include "redash.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: dua-server
+        {{- if .Values.duaServer.podLabels }}
+        {{- tpl (toYaml .Values.duaServer.podLabels) $ | nindent 8 }}
+        {{- end }}
+      {{- if .Values.duaServer.podAnnotations }}
+      annotations:
+      {{ toYaml .Values.duaServer.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "redash.serviceAccountName" . }}
+      # Must cover preStopDrainSeconds plus Gunicorn's graceful timeout.
+      terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml (.Values.duaServer.podSecurityContext | default .Values.server.podSecurityContext) | nindent 8 }}
+      containers:
+        - name: {{ include "redash.name" . }}-dua-server
+          securityContext:
+            {{- toYaml (.Values.duaServer.securityContext | default .Values.server.securityContext) | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh"]
+          args: ["-c", ". /config/dynamicenv.sh && /app/bin/docker-entrypoint server"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            # Do not inherit server mounts; DUA does not need the Snowflake key.
+            {{- with .Values.duaServer.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+          {{- include "redash.env" . | nindent 12 }}
+          # Reuse server app configuration; DUA worker settings follow.
+          {{- range $key, $value := .Values.server.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+            - name: REDASH_WEB_WORKERS
+              value: "{{ .Values.duaServer.webWorkers }}"
+            - name: GUNICORN_WORKER_CLASS
+              value: "{{ .Values.duaServer.workerClass }}"
+            - name: GUNICORN_THREADS
+              value: "{{ .Values.duaServer.threads }}"
+          # DUA-specific values intentionally override server.env.
+          {{- range $key, $value := .Values.duaServer.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          envFrom:
+          {{- include "redash.envFrom" . | nindent 12 }}
+          ports:
+            - containerPort: {{ .Values.server.httpPort }}
+          # TCP liveness avoids false restarts when gthread workers are saturated.
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.server.httpPort }}
+            initialDelaySeconds: 90
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          # HTTP readiness intentionally sheds new traffic when all gthread slots are occupied;
+          # TCP liveness above keeps a healthy saturated pod from being restarted.
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.server.httpPort }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          # Allow endpoint removal to propagate before Gunicorn shuts down.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep {{ .Values.duaServer.preStopDrainSeconds }}"]
+          resources:
+{{ toYaml .Values.duaServer.resources | indent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "redash.fullname" . }}
+        {{- with .Values.duaServer.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    {{- with (.Values.duaServer.nodeSelector | default .Values.server.nodeSelector) }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with (.Values.duaServer.affinity | default .Values.server.affinity) }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with (.Values.duaServer.tolerations | default .Values.server.tolerations) }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- if .Values.duaServer.topologySpread.enabled }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: {{ .Values.duaServer.topologySpread.whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              {{- include "redash.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: dua-server
+    {{- end }}
+{{- end }}

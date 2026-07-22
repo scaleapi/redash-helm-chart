@@ -1,0 +1,20 @@
+{{- if and .Values.duaServer.enabled .Values.duaServer.pdb.enabled }}
+# Protect DUA capacity during voluntary disruptions.
+{{- if .Capabilities.APIVersions.Has "policy/v1/PodDisruptionBudget" }}
+apiVersion: policy/v1
+{{- else }}
+apiVersion: policy/v1beta1
+{{- end }}
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "redash.fullname" . }}-dua-server
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dua-server
+spec:
+  maxUnavailable: {{ .Values.duaServer.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "redash.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: dua-server
+{{- end }}

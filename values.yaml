@@ -383,6 +383,53 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+## Dedicated server pool for long-lived /api/dua/* requests.
+duaServer:
+  # duaServer.enabled -- create the dedicated DUA server Deployment + Service
+  enabled: false
+  # duaServer.replicaCount -- number of DUA server pods
+  replicaCount: 2
+  # duaServer.workerClass -- Gunicorn worker class for concurrent streams.
+  workerClass: gthread
+  # duaServer.threads -- threads per worker (≈ concurrent streams per worker)
+  threads: 16
+  # duaServer.webWorkers -- gunicorn worker processes per pod
+  webWorkers: 2
+  # duaServer.resources -- Resource requests and limits for DUA server pods.
+  resources:
+    requests: { cpu: 250m, memory: 1Gi }
+    limits:   { cpu: "1",  memory: 3Gi }
+  # duaServer.terminationGracePeriodSeconds -- Pod shutdown budget; must exceed preStop plus Gunicorn drain.
+  terminationGracePeriodSeconds: 320
+  # duaServer.preStopDrainSeconds -- Delay before SIGTERM while endpoint removal propagates.
+  preStopDrainSeconds: 15
+  # duaServer.pdb -- Disruption budget for the DUA pool.
+  # maxUnavailable avoids blocking drains when replicaCount is 1.
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  # duaServer.env -- Additional environment variables.
+  # Allow 300s graceful drain and disable recycling to preserve pool capacity.
+  env:
+    GUNICORN_CMD_ARGS: "--graceful-timeout 300"
+    MAX_REQUESTS: "0"
+  # duaServer.service.annotations -- Annotations for the internal DUA Service.
+  service:
+    annotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  # duaServer.topologySpread -- Spread replicas across nodes when possible.
+  topologySpread:
+    enabled: true
+    whenUnsatisfiable: ScheduleAnyway
+  podAnnotations: {}
+  podLabels: {}
+  volumes: []
+  volumeMounts: []
+
 ## Configuration for Redash ad-hoc workers
 workers:
   # Can have multiple of these

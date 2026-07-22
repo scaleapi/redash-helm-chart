@@ -1,7 +1,10 @@
 {{- if and .Values.duaServer.enabled .Values.duaServer.pdb.enabled }}
-# Limits voluntary disruption (node drains, upgrades) of the DUA pool. This is the only
-# chart-managed PDB; the main redash-server's PDB (if any) is defined in the deploy repo, not here.
+# Protect DUA capacity during voluntary disruptions.
+{{- if .Capabilities.APIVersions.Has "policy/v1/PodDisruptionBudget" }}
 apiVersion: policy/v1
+{{- else }}
+apiVersion: policy/v1beta1
+{{- end }}
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "redash.fullname" . }}-dua-server

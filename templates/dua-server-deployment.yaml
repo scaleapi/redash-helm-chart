@@ -1,7 +1,6 @@
 {{- if .Values.duaServer.enabled }}
-# Isolated DUA server: serves /api/dua/* on a dedicated gthread pool so long SSE turns never occupy
-# the main web pool. Near-clone of server-deployment.yaml — KEEP THE POD SPEC IN SYNC with it; the
-# only intended differences are the gunicorn worker vars + grace period.
+# Dedicated DUA server for long-lived /api/dua/* requests.
+# Keep shared application settings aligned with server-deployment.yaml.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,8 +37,7 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       serviceAccountName: {{ include "redash.serviceAccountName" . }}
-      # Grace for in-flight SSE turns to drain on shutdown. Owned by values.yaml (must cover
-      # preStopDrainSeconds + gunicorn --graceful-timeout).
+      # Must cover preStopDrainSeconds plus Gunicorn's graceful timeout.
       terminationGracePeriodSeconds: {{ .Values.duaServer.terminationGracePeriodSeconds }}
       securityContext:
         {{- toYaml (.Values.duaServer.podSecurityContext | default .Values.server.podSecurityContext) | nindent 8 }}
@@ -54,16 +52,13 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-            # Inherit the main server's mounts + any dua-specific extras.
-            {{- with .Values.server.volumeMounts }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+            # Do not inherit server mounts; DUA does not need the Snowflake key.
             {{- with .Values.duaServer.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
           {{- include "redash.env" . | nindent 12 }}
-          # Inherit the main server's app config (server.env); dua-specific worker vars follow.
+          # Reuse server app configuration; DUA worker settings follow.
           {{- range $key, $value := .Values.server.env }}
             - name: "{{ $key }}"
               value: "{{ $value }}"
@@ -74,7 +69,7 @@ spec:
               value: "{{ .Values.duaServer.workerClass }}"
             - name: GUNICORN_THREADS
               value: "{{ .Values.duaServer.threads }}"
-          # duaServer.env last: on a key collision it intentionally overrides server.env (k8s last-wins).
+          # DUA-specific values intentionally override server.env.
           {{- range $key, $value := .Values.duaServer.env }}
             - name: "{{ $key }}"
               value: "{{ $value }}"
@@ -87,9 +82,9 @@ spec:
           {{- include "redash.envFrom" . | nindent 12 }}
           ports:
             - containerPort: {{ .Values.server.httpPort }}
+          # TCP liveness avoids false restarts when gthread workers are saturated.
           livenessProbe:
-            httpGet:
-              path: /ping
+            tcpSocket:
               port: {{ .Values.server.httpPort }}
             initialDelaySeconds: 90
             timeoutSeconds: 1
@@ -105,10 +100,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
-          # preStop drain: sleep so Istio removes this pod from the EndpointSlice before gunicorn
-          # stops accepting, so NEW /api/dua turns don't land on a terminating pod (retries are
-          # disabled for /api/dua/*, so a refused new turn fails outright). NOTE: this holds the app
-          # open, not the istio sidecar — pair with the mesh-side drain (deploy repo) to fully close it.
+          # Allow endpoint removal to propagate before Gunicorn shuts down.
           lifecycle:
             preStop:
               exec:
@@ -119,9 +111,6 @@ spec:
         - name: config
           configMap:
             name: {{ include "redash.fullname" . }}
-        {{- with .Values.server.volumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
         {{- with .Values.duaServer.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -138,7 +127,6 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     {{- if .Values.duaServer.topologySpread.enabled }}
-      # Spread pods across nodes so a single node loss can't take out the whole isolated pool.
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname

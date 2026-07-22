@@ -1,5 +1,4 @@
 {{- if .Values.duaServer.enabled }}
-# Service for the isolated DUA server; the istio VirtualService routes /api/dua/ here.
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,13 +6,12 @@ metadata:
   labels:
     {{- include "redash.labels" . | nindent 4 }}
     app.kubernetes.io/component: dua-server
-  # Own annotations (not the main service's): this is an internal ClusterIP reached only via istio.
   annotations:
   {{- with .Values.duaServer.service.annotations }}
   {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  # ClusterIP (not .Values.service.type): only reached via the istio gateway, never externally.
+  # Internal ClusterIP; ingress is provided by the Istio VirtualService.
   type: ClusterIP
   ports:
     - port: {{ .Values.service.port }}

@@ -383,43 +383,37 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-## Configuration for the isolated DUA (Data Understanding Agent) server.
-## Serves /api/dua/* on its own pool (routed via the istio VirtualService) so long streaming turns
-## never occupy the main web pool. Disabled by default; enabling it is additive and reversible.
+## Dedicated server pool for long-lived /api/dua/* requests.
 duaServer:
   # duaServer.enabled -- create the dedicated DUA server Deployment + Service
   enabled: false
   # duaServer.replicaCount -- number of DUA server pods
   replicaCount: 2
-  # duaServer.workerClass -- gunicorn worker class; gthread lets a blocked SSE stream occupy a
-  # thread (not the whole process) with no gevent monkeypatch / psycopg2 risk
+  # duaServer.workerClass -- Gunicorn worker class for concurrent streams.
   workerClass: gthread
   # duaServer.threads -- threads per worker (≈ concurrent streams per worker)
   threads: 16
   # duaServer.webWorkers -- gunicorn worker processes per pod
   webWorkers: 2
-  # duaServer.resources -- requests/limits (set explicitly: DUA is I/O-bound / low-CPU; don't run unbounded)
+  # duaServer.resources -- Resource requests and limits for DUA server pods.
   resources:
     requests: { cpu: 250m, memory: 1Gi }
     limits:   { cpu: "1",  memory: 3Gi }
-  # duaServer.terminationGracePeriodSeconds -- total pod-shutdown budget. Must cover
-  # preStopDrainSeconds + gunicorn --graceful-timeout (15 + 300 = 315), else k8s SIGKILLs mid-drain.
+  # duaServer.terminationGracePeriodSeconds -- Pod shutdown budget; must exceed preStop plus Gunicorn drain.
   terminationGracePeriodSeconds: 320
-  # duaServer.preStopDrainSeconds -- sleep before SIGTERM so Istio de-registers the pod from the
-  # EndpointSlice before gunicorn stops accepting (keeps new turns off a terminating pod).
+  # duaServer.preStopDrainSeconds -- Delay before SIGTERM while endpoint removal propagates.
   preStopDrainSeconds: 15
-  # duaServer.pdb -- PodDisruptionBudget for the DUA pool (the only PDB in this chart).
-  # maxUnavailable (not minAvailable): drain-safe at any replicaCount -- minAvailable:1 would
-  # deadlock node drains when replicaCount is 1 (disruptionsAllowed = healthy - minAvailable = 0).
+  # duaServer.pdb -- Disruption budget for the DUA pool.
+  # maxUnavailable avoids blocking drains when replicaCount is 1.
   pdb:
     enabled: true
     maxUnavailable: 1
-  # duaServer.env -- extra env. GUNICORN_CMD_ARGS raises gunicorn's graceful-timeout so a recycling
-  # worker drains its in-flight SSE turn instead of cutting it at the 30s default.
+  # duaServer.env -- Additional environment variables.
+  # Allow 300s graceful drain and disable recycling to preserve pool capacity.
   env:
     GUNICORN_CMD_ARGS: "--graceful-timeout 300"
-  # duaServer.service.annotations -- annotations for the DUA Service, independent of service.annotations
-  # (the main external service): this is an internal ClusterIP reached only via the istio VirtualService.
+    MAX_REQUESTS: "0"
+  # duaServer.service.annotations -- Annotations for the internal DUA Service.
   service:
     annotations: {}
   podSecurityContext: {}
@@ -427,8 +421,7 @@ duaServer:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  # duaServer.topologySpread -- spread pods across nodes (soft) so one node loss can't take out the
-  # whole isolated pool. ScheduleAnyway keeps it non-blocking; selects only dua-server pods.
+  # duaServer.topologySpread -- Spread replicas across nodes when possible.
   topologySpread:
     enabled: true
     whenUnsatisfiable: ScheduleAnyway

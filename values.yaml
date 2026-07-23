@@ -409,8 +409,11 @@ duaServer:
     enabled: true
     maxUnavailable: 1
   # duaServer.env -- Additional environment variables.
-  # Allow 300s graceful drain and disable recycling to preserve pool capacity.
+  # Allow 300s graceful drain, disable recycling to preserve pool capacity, and
+  # enable per-worker DUA lifecycle/occupancy telemetry.
   env:
+    DUA_POOL_METRICS_ENABLED: "true"
+    GUNICORN_CONFIG: "python:redash.gunicorn_dua"
     GUNICORN_CMD_ARGS: "--graceful-timeout 300"
     MAX_REQUESTS: "0"
   # duaServer.service.annotations -- Annotations for the internal DUA Service.

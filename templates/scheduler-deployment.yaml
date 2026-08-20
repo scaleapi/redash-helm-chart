@@ -19,12 +19,15 @@ spec:
       labels:
         {{- include "redash.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: scheduler
+        {{- with .Values.commonLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
         {{- if .Values.scheduler.podLabels }}
         {{- tpl (toYaml .Values.scheduler.podLabels) $ | nindent 8 }}
         {{- end }}
-      {{- if .Values.scheduler.podAnnotations }}
+      {{- with .Values.scheduler.podAnnotations }}
       annotations:
-      {{ toYaml .Values.scheduler.podAnnotations | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}

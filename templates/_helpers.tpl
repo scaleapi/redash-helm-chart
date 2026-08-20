@@ -601,6 +601,9 @@ helm.sh/chart: {{ include "redash.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.commonLabels }}
+{{ tpl (toYaml .) $ }}
+{{- end }}
 {{- end -}}
 
 {{/*

@@ -17,9 +17,12 @@ spec:
       name: "{{ .Release.Name }}"
       labels:
         {{- include "redash.selectorLabels" . | nindent 8 }}
-      {{- if .Values.hookUpgradeJob.podAnnotations }}
+        {{- with .Values.commonLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      {{- with .Values.hookUpgradeJob.podAnnotations }}
       annotations:
-      {{ toYaml .Values.hookUpgradeJob.podAnnotations | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}

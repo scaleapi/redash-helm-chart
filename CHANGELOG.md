@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.16
+
+- Use `Recreate` for the scheduler Deployment.
+- Add templated `commonLabels` and pod annotations.
+- Make server, DUA, scheduler, and worker probes configurable without changing defaults.
+
 ## 3.0.0
 
 - Initial release supporting Redash v10.x

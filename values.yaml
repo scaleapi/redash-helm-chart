@@ -318,6 +318,12 @@ server:
   # server.replicaCount -- Number of server pods to run
   replicaCount: 1
 
+  # server.livenessProbe -- Optional complete override for the server liveness probe. Omit to use the current default; set to {} to disable.
+  # livenessProbe: {}
+
+  # server.readinessProbe -- Optional complete override for the server readiness probe. Omit to use the current default; set to {} to disable.
+  # readinessProbe: {}
+
   # server.resources -- Server resource requests and limits [ref](http://kubernetes.io/docs/user-guide/compute-resources/)
   resources:
     {}
@@ -406,6 +412,10 @@ duaServer:
   terminationGracePeriodSeconds: 320
   # duaServer.preStopDrainSeconds -- Delay before SIGTERM while endpoint removal propagates.
   preStopDrainSeconds: 15
+  # duaServer.livenessProbe -- Optional complete override for the DUA liveness probe. Omit to use the current default; set to {} to disable.
+  # livenessProbe: {}
+  # duaServer.readinessProbe -- Optional complete override for the DUA readiness probe. Omit to use the current default; set to {} to disable.
+  # readinessProbe: {}
   # duaServer.pdb -- Disruption budget for the DUA pool.
   # maxUnavailable avoids blocking drains when replicaCount is 1.
   pdb:
@@ -450,6 +460,9 @@ workers:
     # adhocWorker.replicaCount -- Number of ad-hoc worker pods to run
     replicaCount: 1
 
+    # adhocWorker.livenessProbe -- Optional pod-local worker liveness probe configuration
+    livenessProbe: {}
+
     # adhocWorker.resources -- Ad-hoc worker resource requests and limits [ref](http://kubernetes.io/docs/user-guide/compute-resources/)
     resources:
       # limits:
@@ -492,6 +505,9 @@ scheduler:
 
   # scheduler.replicaCount -- Number of scheduler pods to run
   replicaCount: 1
+
+  # scheduler.livenessProbe -- Optional scheduler liveness probe configuration
+  livenessProbe: {}
 
   # scheduler.resources -- scheduler resource requests and limits [ref](http://kubernetes.io/docs/user-guide/compute-resources/)
   resources:

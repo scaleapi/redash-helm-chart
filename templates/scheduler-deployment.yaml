@@ -59,6 +59,10 @@ spec:
           {{- end }}
           envFrom:
           {{- include "redash.envFrom" . | nindent 12 }}
+          {{- with .Values.scheduler.livenessProbe }}
+          livenessProbe:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
           resources:
 {{ toYaml .Values.scheduler.resources | indent 12 }}
       volumes:

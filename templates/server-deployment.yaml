@@ -67,6 +67,12 @@ spec:
           {{- include "redash.envFrom" . | nindent 12 }}
           ports:
             - containerPort: {{ .Values.server.httpPort }}
+          {{- if hasKey .Values.server "livenessProbe" }}
+          {{- with .Values.server.livenessProbe }}
+          livenessProbe:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+          {{- else }}
           livenessProbe:
             httpGet:
               path: /ping
@@ -77,6 +83,13 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 10
+          {{- end }}
+          {{- if hasKey .Values.server "readinessProbe" }}
+          {{- with .Values.server.readinessProbe }}
+          readinessProbe:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+          {{- else }}
           readinessProbe:
             httpGet:
               path: /ping
@@ -86,6 +99,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
+          {{- end }}
           resources:
 {{ toYaml .Values.server.resources | indent 12 }}
       volumes:

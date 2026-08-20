@@ -17,12 +17,15 @@ spec:
       labels:
         {{- include "redash.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $worker.name }}
+        {{- with $.Values.commonLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
         {{- if $worker.podLabels }}
         {{- tpl (toYaml $worker.podLabels) $ | nindent 8 }}
         {{- end }}
-      {{- if $worker.podAnnotations }}
+      {{- with $worker.podAnnotations }}
       annotations:
-      {{- toYaml $worker.podAnnotations | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
     spec:
     {{- with $.Values.imagePullSecrets }}

@@ -24,12 +24,15 @@ spec:
       labels:
         {{- include "redash.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: dua-server
+        {{- with .Values.commonLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
         {{- if .Values.duaServer.podLabels }}
         {{- tpl (toYaml .Values.duaServer.podLabels) $ | nindent 8 }}
         {{- end }}
-      {{- if .Values.duaServer.podAnnotations }}
+      {{- with .Values.duaServer.podAnnotations }}
       annotations:
-      {{ toYaml .Values.duaServer.podAnnotations | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}

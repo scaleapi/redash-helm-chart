@@ -104,6 +104,13 @@ jobs:
             helm dependency build .
 
       - run:
+          name: Verify migration modes
+          command: |
+            if [[ $HELM_VERSION =~ ^v3\. ]]; then
+              bash ./tests/test-migration-modes.sh
+            fi
+
+      - run:
           name: Generate test configuration
           command: |
             # As well a setting secrets we also reduce resource usage a bit by dropping the worker count.

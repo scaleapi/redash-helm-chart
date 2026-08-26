@@ -15,6 +15,14 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+# migration.mode -- Database migration integration. Use helm-hooks for Helm releases or argocd-job for Argo CD.
+migration:
+  mode: helm-hooks
+
+# tests.enabled -- Render the Helm test Pod.
+tests:
+  enabled: true
+
 # commonLabels -- Labels applied to all chart resources and pod templates. Values are rendered as templates.
 commonLabels: {}
 

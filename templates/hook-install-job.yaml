@@ -1,3 +1,4 @@
+{{- if eq (include "redash.migrationMode" .) "helm-hooks" }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -69,3 +70,4 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
+{{- end }}

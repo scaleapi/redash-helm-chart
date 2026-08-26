@@ -1,0 +1,76 @@
+{{- if eq (include "redash.migrationMode" .) "argocd-job" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-db-migration" (include "redash.fullname" .) }}
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database-migration
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "redash.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: database-migration
+        {{- with .Values.commonLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "redash.serviceAccountName" . }}
+      restartPolicy: Never
+      securityContext:
+        {{- toYaml .Values.hookUpgradeJob.podSecurityContext | nindent 8 }}
+      containers:
+        - name: database-migration
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.hookUpgradeJob.securityContext | nindent 12 }}
+          command:
+            - /bin/bash
+            - -c
+          args:
+            - '. /config/dynamicenv.sh && exec /app/manage.py db upgrade'
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          env:
+            {{- include "redash.env" . | nindent 12 }}
+            {{- range $key, $value := .Values.server.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- include "redash.envFrom" . | nindent 12 }}
+          {{- with .Values.hookUpgradeJob.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "redash.fullname" . }}
+      {{- with .Values.hookUpgradeJob.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hookUpgradeJob.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hookUpgradeJob.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

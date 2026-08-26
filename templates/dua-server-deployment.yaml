@@ -1,4 +1,5 @@
 {{- if .Values.duaServer.enabled }}
+{{- $migrationMode := include "redash.migrationMode" . }}
 # Dedicated DUA server for long-lived /api/dua/* requests.
 # Keep shared application settings aligned with server-deployment.yaml.
 apiVersion: apps/v1
@@ -8,6 +9,10 @@ metadata:
   labels:
     {{- include "redash.labels" . | nindent 4 }}
     app.kubernetes.io/component: dua-server
+  {{- if eq $migrationMode "argocd-job" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   replicas: {{ .Values.duaServer.replicaCount }}
   strategy:

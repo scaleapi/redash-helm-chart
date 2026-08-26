@@ -13,6 +13,15 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/* Validate and return the database migration mode. */}}
+{{- define "redash.migrationMode" -}}
+{{- $mode := default "helm-hooks" .Values.migration.mode -}}
+{{- if not (has $mode (list "helm-hooks" "argocd-job")) -}}
+{{- fail "migration.mode must be one of helm-hooks or argocd-job" -}}
+{{- end -}}
+{{- $mode -}}
+{{- end -}}
+
 {{/*
 Create a default fully qualified app name.
 We truncate at 43 chars because some Kubernetes name fields are limited to 64 (by the DNS naming spec),

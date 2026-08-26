@@ -1,4 +1,5 @@
 {{ range $key, $worker := .Values.workers }}
+{{- $migrationMode := include "redash.migrationMode" $ }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,6 +7,10 @@ metadata:
   labels:
     {{- include "redash.labels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $worker.name }}
+  {{- if eq $migrationMode "argocd-job" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   replicas: {{ $worker.replicaCount }}
   selector:

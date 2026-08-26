@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0
+
+- Add an ordinary, wave-ordered database migration Job for Argo CD releases.
+- Preserve the existing install and upgrade hooks for Helm releases.
+- Allow Helm test Pods to be disabled for Argo CD rendering.
+
 ## 3.0.16
 
 - Use `Recreate` for the scheduler Deployment.

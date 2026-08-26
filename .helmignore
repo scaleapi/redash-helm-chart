@@ -24,6 +24,7 @@
 # Ignore development oriented files
 .circleci/
 scripts/
+tests/test-migration-modes.sh
 *.gotmpl
 .restyled.yaml
 .pre-commit-config.yaml

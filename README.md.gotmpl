@@ -61,6 +61,12 @@ $ helm delete my-release
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Database migrations
+
+The default `helm-hooks` mode preserves existing Helm behavior. For an Argo
+CD-managed release, use `argocd-job` to run one ordinary migration Job before
+the Deployments. Retry a failed migration by syncing the application again.
+
 {{ template "chart.requirementsSection" . }}
 
 ## Configuration

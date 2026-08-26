@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.17
+
+- Use the stable `policy/v1` API for the DUA server disruption budget.
+
 ## 3.0.16
 
 - Use `Recreate` for the scheduler Deployment.
